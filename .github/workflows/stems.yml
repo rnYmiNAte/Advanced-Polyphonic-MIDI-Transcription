@@ -1,0 +1,34 @@
+name: Stem Separation
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "audio/**.mp3"
+      - "audio/**.wav"
+
+jobs:
+  separate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - run: pip install spleeter soundfile
+
+      - run: mkdir -p output/stems
+
+      - name: Run Spleeter
+        run: |
+          for f in audio/*.mp3 audio/*.wav; do
+            spleeter separate -o output/stems "$f"
+          done
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: stems
+          path: output/stems/
