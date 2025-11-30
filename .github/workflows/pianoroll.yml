@@ -1,0 +1,30 @@
+name: Piano Roll Rendering
+
+on:
+  workflow_dispatch:
+
+jobs:
+  pianoroll:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - run: pip install mido matplotlib numpy
+
+      - run: mkdir -p output/piano_roll
+
+      - name: Convert MIDI to Piano Roll Images
+        run: |
+          for f in output/midi/*.mid; do
+            python scripts/piano_roll.py "$f"
+          done
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PianoRoll
+          path: output/piano_roll/
