@@ -1,0 +1,28 @@
+# Core scientific stack
+numpy
+scipy
+matplotlib
+pandas
+
+# Audio processing
+librosa
+soundfile
+pydub
+audioread
+
+# Machine learning (CREPE, basic torch models)
+torch
+torchaudio
+
+# Stem separation (Spleeter 4-stem)
+spleeter
+
+# MIDI writing
+mido
+pretty_midi
+
+# Visualization
+Pillow
+
+# Utility
+tqdm
