@@ -1,0 +1,28 @@
+name: MIDI Quantization
+
+on:
+  workflow_dispatch:
+
+jobs:
+  quantize:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - run: pip install mido numpy
+
+      - name: Quantize all MIDI
+        run: |
+          for f in output/midi/*.mid; do
+            python scripts/midi_quantizer.py "$f"
+          done
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Quantized-MIDI
+          path: output/midi/
