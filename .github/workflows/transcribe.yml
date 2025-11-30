@@ -1,0 +1,94 @@
+name: AI Audio → Multi-Track MIDI Transcription
+
+on:
+  push:
+    paths:
+      - "audio/**.mp3"
+      - "audio/**.wav"
+      - ".github/workflows/transcribe.yml"
+  workflow_dispatch:
+
+jobs:
+
+  transcribe:
+    name: Run Transcription
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+
+      # ---------------------------------------------------------------
+      # Install Python + Dependencies
+      # ---------------------------------------------------------------
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install mido numpy scipy matplotlib soundfile
+          pip install spleeter
+
+
+      # ---------------------------------------------------------------
+      # Create Output Folders
+      # ---------------------------------------------------------------
+      - name: Create output directories
+        run: |
+          mkdir -p output/stems
+          mkdir -p output/midi
+          mkdir -p output/piano_roll
+          mkdir -p output/logs
+
+
+      # ---------------------------------------------------------------
+      # Find All Audio Files
+      # ---------------------------------------------------------------
+      - name: List audio files
+        id: audio_list
+        run: |
+          FILES=$(ls audio/*.mp3 audio/*.wav 2>/dev/null | xargs -I{} echo "{}" | tr '\n' ' ')
+          echo "files=$FILES" >> $GITHUB_OUTPUT
+
+
+      # ---------------------------------------------------------------
+      # Run Transcription Script
+      # ---------------------------------------------------------------
+      - name: Process all audio files
+        run: |
+          for f in ${{ steps.audio_list.outputs.files }}; do
+            echo "Processing: $f"
+            python scripts/polyphonic_midi_plus.py "$f"
+          done
+
+
+      # ---------------------------------------------------------------
+      # Upload results
+      # ---------------------------------------------------------------
+      - name: Upload MIDI Files
+        uses: actions/upload-artifact@v4
+        with:
+          name: MIDI
+          path: output/midi/
+
+      - name: Upload Stems
+        uses: actions/upload-artifact@v4
+        with:
+          name: Stems
+          path: output/stems/
+
+      - name: Upload Piano Rolls
+        uses: actions/upload-artifact@v4
+        with:
+          name: PianoRoll
+          path: output/piano_roll/
+
+      - name: Upload Logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: Logs
+          path: output/logs/
